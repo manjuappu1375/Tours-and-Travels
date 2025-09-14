@@ -1,0 +1,68 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mongo
+  namespace: travelx
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mongo
+  template:
+    metadata:
+      labels:
+        app: mongo
+    spec:
+      containers:
+        - name: mongo
+          image: mongo:6.0
+          ports:
+            - containerPort: 27017
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: travelx-backend
+  namespace: travelx
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: travelx-backend
+  template:
+    metadata:
+      labels:
+        app: travelx-backend
+    spec:
+      containers:
+        - name: backend
+          image: YOUR_REGISTRY_URL/travelx-backend:latest
+          ports:
+            - containerPort: 5000
+          envFrom:
+            - configMapRef:
+                name: travelx-config
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: travelx-frontend
+  namespace: travelx
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: travelx-frontend
+  template:
+    metadata:
+      labels:
+        app: travelx-frontend
+    spec:
+      containers:
+        - name: frontend
+          image: YOUR_REGISTRY_URL/travelx-frontend:latest
+          ports:
+            - containerPort: 80
+          envFrom:
+            - configMapRef:
+                name: travelx-config

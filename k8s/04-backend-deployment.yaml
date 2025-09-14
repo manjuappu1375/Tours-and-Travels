@@ -1,0 +1,25 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: travelx-backend
+  namespace: travelx
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: travelx-backend
+  template:
+    metadata:
+      labels:
+        app: travelx-backend
+    spec:
+      containers:
+        - name: backend
+          image: YOUR_REGISTRY_URL/travelx-backend:latest
+          ports:
+            - containerPort: 5000
+          envFrom:
+            - configMapRef:
+                name: travelx-config
+            - secretRef:
+                name: travelx-secret

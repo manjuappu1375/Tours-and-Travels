@@ -1,0 +1,25 @@
+# Backend Dockerfile (Node.js + Express + MongoDB connection)
+
+# Use latest LTS Node on Alpine (smaller, secure)
+FROM node:20-alpine3.20
+
+# Apply security patches to Alpine
+RUN apk upgrade --no-cache
+
+# Set working directory
+WORKDIR /app
+
+# Copy package files first for better caching
+COPY package*.json ./
+
+# Install only production dependencies
+RUN npm ci --only=production
+
+# Copy rest of backend source code
+COPY . .
+
+# Expose backend port (default: 5000, adjust if different)
+EXPOSE 5000
+
+# Start the backend server
+CMD ["npm", "start"]

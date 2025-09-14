@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: travelx-frontend
+  namespace: travelx
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: travelx-frontend
+  template:
+    metadata:
+      labels:
+        app: travelx-frontend
+    spec:
+      containers:
+        - name: frontend
+          image: YOUR_REGISTRY_URL/travelx-frontend:latest
+          ports:
+            - containerPort: 80
+          envFrom:
+            - configMapRef:
+                name: travelx-config

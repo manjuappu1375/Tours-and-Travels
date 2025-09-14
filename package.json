@@ -1,0 +1,17 @@
+{
+  "name": "travelx",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Monorepo for the TravelX platform",
+  "scripts": {
+    "install:all": "npm install && npm install --prefix client && npm install --prefix server",
+    "dev": "concurrently \"npm:dev --prefix client\" \"npm:dev --prefix server\"",
+    "dev:client": "npm run dev --prefix client",
+    "dev:server": "npm run dev --prefix server",
+    "data:import": "npm run data:import --prefix server",
+    "data:destroy": "npm run data:destroy --prefix server"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}
