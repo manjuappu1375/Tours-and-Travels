@@ -3,7 +3,9 @@ import Tour from '../models/tourModel.js';
 // To ensure the application is browsable even without a database connection,
 // we will use the static tours data as a fallback/primary source.
 import toursData from '../data/tours.js';
+import { generateContent } from '../utils/geminiService.js';
 import { generateTravelTip } from '../utils/geminiService.js';
+
 
 
 // @desc    Fetch all tours
