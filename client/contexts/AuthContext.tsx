@@ -17,7 +17,12 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   useEffect(() => {
     const storedUser = localStorage.getItem('userInfo');
     if (storedUser) {
-      setUser(JSON.parse(storedUser));
+      try {
+        setUser(JSON.parse(storedUser));
+      } catch (error) {
+        console.error("Failed to parse user info from localStorage", error);
+        localStorage.removeItem('userInfo');
+      }
     }
   }, []);
 

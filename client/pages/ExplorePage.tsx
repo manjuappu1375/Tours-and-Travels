@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useSearchParams, useNavigate } from 'react-router-dom';
+import { useSearchParams } from 'react-router-dom';
 import TourCard from '../components/TourCard';
 import { Tour } from '../types';
 import { getTours } from '../services/tourService';
@@ -9,7 +9,6 @@ const ExplorePage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchParams, setSearchParams] = useSearchParams();
-  const navigate = useNavigate();
 
   const query = searchParams.get('q') || '';
   const state = searchParams.get('state') || '';

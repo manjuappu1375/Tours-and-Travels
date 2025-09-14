@@ -1,77 +1,43 @@
 import asyncHandler from 'express-async-handler';
 import Tour from '../models/tourModel.js';
-// To ensure the application is browsable even without a database connection,
-// we will use the static tours data as a fallback/primary source.
-import toursData from '../data/tours.js';
-import { generateContent } from '../utils/geminiService.js';
 import { generateTravelTip } from '../utils/geminiService.js';
-
 
 
 // @desc    Fetch all tours
 // @route   GET /api/tours
 // @access  Public
 const getTours = asyncHandler(async (req, res) => {
-  // This controller now serves static data from `data/tours.js` to prevent
-  // the "Failed to fetch tours" error when a database is not connected.
   const { keyword, state } = req.query;
-  let filteredTours = toursData;
+  const query = {};
 
   if (state) {
-    filteredTours = filteredTours.filter(tour =>
-      tour.state.toLowerCase() === state.toLowerCase()
-    );
+    // Case-insensitive regex search for the state
+    query.state = { $regex: new RegExp(`^${state}$`, 'i') };
   }
 
   if (keyword) {
-    const lowercasedKeyword = keyword.toLowerCase();
-    filteredTours = filteredTours.filter(tour =>
-      tour.title.toLowerCase().includes(lowercasedKeyword) ||
-      tour.location.toLowerCase().includes(lowercasedKeyword) ||
-      tour.state.toLowerCase().includes(lowercasedKeyword) ||
-      tour.description.toLowerCase().includes(lowercasedKeyword) ||
-      (tour.itinerary && tour.itinerary.some(day => 
-        day.title.toLowerCase().includes(lowercasedKeyword) ||
-        day.description.toLowerCase().includes(lowercasedKeyword)
-      ))
-    );
+    const searchRegex = { $regex: keyword, $options: 'i' };
+    query.$or = [
+      { title: searchRegex },
+      { location: searchRegex },
+      { state: searchRegex },
+      { description: searchRegex },
+    ];
   }
-  
-  res.json(filteredTours);
+
+  const tours = await Tour.find({ ...query });
+  res.json(tours);
 });
 
 // @desc    Fetch single tour
 // @route   GET /api/tours/:id
 // @access  Public
 const getTourById = asyncHandler(async (req, res) => {
-  // Find the base tour data from the static file.
-  const staticTour = toursData.find((t) => t._id === req.params.id);
+  const tour = await Tour.findById(req.params.id);
 
-  if (staticTour) {
-    try {
-      // Attempt to find the tour in the database to fetch dynamic data like reviews.
-      // This will fail gracefully if the database is not connected.
-      const dbTour = await Tour.findById(req.params.id);
-      if (dbTour) {
-        // If found in DB, combine them. Precedence to DB data for dynamic fields.
-        const responseTour = {
-          ...staticTour,
-          reviews: dbTour.reviews,
-          rating: dbTour.rating,
-          numReviews: dbTour.numReviews,
-        };
-        res.json(responseTour);
-      } else {
-        // If not in DB, serve the static data as is.
-        res.json(staticTour);
-      }
-    } catch (error) {
-      // If the database call fails, log the error and fall back to serving static data.
-      console.warn(`DB fetch for tour ${req.params.id} failed. Serving static data. Error: ${error.message}`);
-      res.json(staticTour);
-    }
+  if (tour) {
+    res.json(tour);
   } else {
-    // If the tour isn't in the static file, it doesn't exist.
     res.status(404);
     throw new Error('Tour not found');
   }
